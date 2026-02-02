@@ -2,3 +2,4 @@ streamlit
 pandas
 streamlit-calendar
 st-gsheets-connection
+duckdb==1.1.3
