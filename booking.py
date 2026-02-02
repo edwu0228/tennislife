@@ -9,7 +9,17 @@ ADMIN_PASSWORD = "1234"
 BANNER_IMAGE = "https://images.unsplash.com/photo-1595435064214-08df12859444?q=80&w=1000"
 
 # --- 2. 建立 Google Sheets 連線 ---
-conn = st.connection("gsheets", type=GSheetsConnection)
+# 建立一個手動處理 private_key 的字典
+if "gsheets" in st.secrets["connections"]:
+    s_dict = dict(st.secrets["connections"]["gsheets"])
+    # 關鍵修正：將字串中的 \n 轉換成真正的換行
+    if "private_key" in s_dict:
+        s_dict["private_key"] = s_dict["private_key"].replace("\\n", "\n")
+    
+    # 使用處理過的字典建立連線
+    conn = st.connection("gsheets", type=GSheetsConnection, **s_dict)
+else:
+    conn = st.connection("gsheets", type=GSheetsConnection)
 
 def load_data(worksheet_name, columns):
     try:
