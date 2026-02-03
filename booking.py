@@ -9,17 +9,7 @@ ADMIN_PASSWORD = "1234"
 BANNER_IMAGE = "https://images.unsplash.com/photo-1595435064214-08df12859444?q=80&w=1000"
 
 # --- 2. 建立 Google Sheets 連線 ---
-# 建立一個手動處理 private_key 的字典
-if "gsheets" in st.secrets["connections"]:
-    s_dict = dict(st.secrets["connections"]["gsheets"])
-    # 關鍵修正：將字串中的 \n 轉換成真正的換行
-    if "private_key" in s_dict:
-        s_dict["private_key"] = s_dict["private_key"].replace("\\n", "\n")
-    
-    # 使用處理過的字典建立連線
-    conn = st.connection("gsheets", type=GSheetsConnection, **s_dict)
-else:
-    conn = st.connection("gsheets", type=GSheetsConnection)
+conn = st.connection("gsheets", type=GSheetsConnection)
 
 def load_data(worksheet_name, columns):
     try:
@@ -32,11 +22,8 @@ def load_data(worksheet_name, columns):
         return pd.DataFrame(columns=columns)
 
 def save_data(df, worksheet_name):
-    # 這裡不要用 try/except，讓錯誤直接噴出來我們才知道問題在哪
-    df_to_save = df.reset_index(drop=True)
-    conn.update(worksheet=worksheet_name, data=df_to_save)
-    st.cache_data.clear()
-    st.toast(f"✅ 已同步至 {worksheet_name}")
+    conn.update(worksheet=worksheet_name, data=df)
+    st.cache_data.clear() # 強制清除所有讀取快取
 
 # --- 3. 載入資料 ---
 df_bookings = load_data("bookings", ["姓名", "日期", "地點", "時段", "備註"])
